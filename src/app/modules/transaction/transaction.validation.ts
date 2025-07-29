@@ -1,10 +1,21 @@
 import { z } from 'zod';
 
-export const amountSchema = z.object({
-  amount: z.number().positive(),
+export const addMoneyValidation = z.object({
+  body: z.object({
+    amount: z.number().positive(),
+  }),
 });
 
-export const sendMoneySchema = z.object({
-  amount: z.number().positive(),
-  receiverEmail: z.string().email(),
+export const sendMoneyValidation = z.object({
+  body: z.object({
+    amount: z.number().positive(),
+    receiverPhone: z.string().min(10),
+  }),
+});
+
+export const cashOutValidation = z.object({
+  body: z.object({
+    amount: z.number().positive(),
+    userPhone: z.string().min(10),
+  }),
 });

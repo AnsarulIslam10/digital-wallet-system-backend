@@ -25,37 +25,40 @@ const withdrawMoney = catchAsync(async (req: Request, res: Response) => {
 })
 
 const sendMoney = catchAsync(async (req: Request, res: Response) => {
-    const { receiverEmail, amount } = req.body;
-    const result = await TransactionService.sendMoney(req.user.userId, receiverEmail, amount);
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: 'Money sent successfully',
-        data: result,
-    });
-})
+  const { receiverPhone, amount } = req.body;
+  const result = await TransactionService.sendMoney(req.user.userId, receiverPhone, amount);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Money sent successfully',
+    data: result
+  });
+});
 
 const agentCashIn = catchAsync(async (req: Request, res: Response) => {
-    const { receiverEmail, amount } = req.body;
-    const result = await TransactionService.agentCashIn(req.user.userId, receiverEmail, amount);
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: 'Cash-in successful',
-        data: result,
-    });
-})
+  const { receiverPhone, amount } = req.body;
+  const result = await TransactionService.agentCashIn(req.user.userId, receiverPhone, amount);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Cash-in successful',
+    data: result
+  });
+});
 
 const agentCashOut = catchAsync(async (req: Request, res: Response) => {
-    const { userEmail, amount } = req.body;
-    const result = await TransactionService.agentCashOut(req.user.userId, userEmail, amount);
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: 'Cash-out successful',
-        data: result,
-    });
-})
+  const { userPhone, amount } = req.body;
+  const result = await TransactionService.agentCashOut(req.user.userId, userPhone, amount);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Cash-out successful',
+    data: result
+  });
+});
 
 const getMyHistory = catchAsync(async (req: Request, res: Response) => {
     const result = await TransactionService.getMyTransactions(req.user.userId);

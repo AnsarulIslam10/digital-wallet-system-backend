@@ -3,7 +3,7 @@ import { Wallet } from './wallet.model';
 
 
 const getMyWallet = async (userId: string) => {
-    const wallet = await Wallet.findOne({ user: userId }).populate('user', 'email role');
+    const wallet = await Wallet.findOne({ user: userId }).populate('user', 'name email role phone');
     if (!wallet) throw new AppError(404, 'Wallet not found');
     return wallet;
 }
