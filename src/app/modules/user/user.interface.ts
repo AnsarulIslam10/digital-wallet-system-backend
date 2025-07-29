@@ -4,6 +4,10 @@ export enum Role {
   USER = 'user',
   AGENT = 'agent',
 }
+export interface IAuthProvider {
+    provider: "google" |"credentials";
+    providerId: string;
+}
 
 export enum IsActive {
   ACTIVE = 'active',
