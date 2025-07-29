@@ -1,5 +1,6 @@
 import { model, Schema } from "mongoose";
 import { IAuthProvider, IsActive, IUser, Role } from "./user.interface";
+import { Wallet } from "../wallet/wallet.model";
 
 const authProviderSchema = new Schema<IAuthProvider>({
     provider: { type: String, required: true },
@@ -34,5 +35,13 @@ const userSchema = new Schema<IUser>({
     timestamps: true,
     versionKey: false,
 })
+
+// Auto create wallet
+userSchema.post('save', async function (user) {
+  await Wallet.create({
+    user: user._id,
+    balance: 50,
+  });
+});
 
 export const User = model<IUser>("User", userSchema)
