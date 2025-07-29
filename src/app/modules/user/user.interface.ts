@@ -5,8 +5,8 @@ export enum Role {
   AGENT = 'agent',
 }
 export interface IAuthProvider {
-    provider: "google" |"credentials";
-    providerId: string;
+  provider: "google" | "credentials";
+  providerId: string;
 }
 
 export enum IsActive {
@@ -21,8 +21,12 @@ export interface IUser {
   password?: string;
   phone?: string;
   address?: string;
+  picture?: string,
+  isDeleted?: string;
   isActive?: IsActive;
+  isVerified?: boolean;
   role: Role;
+  auths: IAuthProvider[];
   createdAt?: Date;
   updatedAt?: Date;
 }
