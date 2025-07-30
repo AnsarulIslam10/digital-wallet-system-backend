@@ -11,10 +11,13 @@ interface EnvConfig {
     JWT_ACCESS_EXPIRES: string
     JWT_REFRESH_SECRET: string
     JWT_REFRESH_EXPIRES: string
+    TRANSACTION_FEE_PERCENT: number;
+    DAILY_SEND_LIMIT: number;
 }
 
 const lodaEnvVariables = (): EnvConfig => {
-    const requiredEnvVariables: string[] = ["PORT", "DB_URL", "NODE_ENV", "BCRYPT_SALT_ROUND", "JWT_ACCESS_SECRET", "JWT_ACCESS_EXPIRES", "JWT_REFRESH_SECRET", "JWT_REFRESH_EXPIRES"];
+    const requiredEnvVariables: string[] = ["PORT", "DB_URL", "NODE_ENV", "BCRYPT_SALT_ROUND", "JWT_ACCESS_SECRET", "JWT_ACCESS_EXPIRES", "JWT_REFRESH_SECRET", "JWT_REFRESH_EXPIRES", 'TRANSACTION_FEE_PERCENT',
+        'DAILY_SEND_LIMIT',];
 
     requiredEnvVariables.forEach(key => {
         if (!process.env[key]) {
@@ -29,7 +32,10 @@ const lodaEnvVariables = (): EnvConfig => {
         JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET as string,
         JWT_ACCESS_EXPIRES: process.env.JWT_ACCESS_EXPIRES as string,
         JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET as string,
-        JWT_REFRESH_EXPIRES: process.env.JWT_REFRESH_EXPIRES as string
+        JWT_REFRESH_EXPIRES: process.env.JWT_REFRESH_EXPIRES as string,
+        TRANSACTION_FEE_PERCENT: Number(process.env.TRANSACTION_FEE_PERCENT),
+        DAILY_SEND_LIMIT: Number(process.env.DAILY_SEND_LIMIT),
+
     }
 }
 

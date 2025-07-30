@@ -6,7 +6,7 @@ const transactionSchema = new Schema<ITransaction>(
     from: { type: Schema.Types.ObjectId, ref: 'User' },
     to: { type: Schema.Types.ObjectId, ref: 'User' },
     amount: { type: Number, required: true },
-    type: { type: String, required: true, enum: ['add', 'withdraw', 'send', 'cash-in', 'cash-out'] },
+    type: { type: String, required: true, enum: ['add', 'withdraw', 'send', 'cash-in', 'cash-out', 'fee'] },
     commission: { type: Number, default: 0 },
     description: { type: String },
   },

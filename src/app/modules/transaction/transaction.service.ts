@@ -1,3 +1,5 @@
+import mongoose from 'mongoose';
+import { envVars } from '../../config/env';
 import AppError from '../../errorHelpers/AppError';
 import { User } from '../user/user.model';
 import { Wallet } from '../wallet/wallet.model';
@@ -36,6 +38,34 @@ const withdrawMoney = async (userId: string, amount: number) => {
 }
 
 const sendMoney = async (senderId: string, receiverPhone: string, amount: number) => {
+  const feeRate = envVars.TRANSACTION_FEE_PERCENT || 0;
+  const fee = (amount * feeRate) / 100;
+  const totalAmount = amount + fee;
+
+  // Check daily limit
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const sentToday = await Transaction.aggregate([
+    {
+      $match: {
+        from: new mongoose.Types.ObjectId(senderId),
+        type: 'send',
+        createdAt: { $gte: today }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: '$amount' }
+      }
+    }
+  ]);
+
+  const totalSent = sentToday[0]?.total || 0;
+  if (totalSent + amount > envVars.DAILY_SEND_LIMIT) {
+    throw new AppError(400, 'Daily send limit exceeded');
+  }
+
   const sender = await User.findById(senderId);
   const receiver = await User.findOne({ phone: receiverPhone });
 
@@ -46,9 +76,9 @@ const sendMoney = async (senderId: string, receiverPhone: string, amount: number
 
   if (!senderWallet || senderWallet.isBlocked) throw new AppError(403, 'Sender wallet is blocked');
   if (!receiverWallet || receiverWallet.isBlocked) throw new AppError(403, 'Receiver wallet is blocked');
-  if (senderWallet.balance < amount) throw new AppError(400, 'Insufficient balance');
+  if (senderWallet.balance < totalAmount) throw new AppError(400, 'Insufficient balance with fee');
 
-  senderWallet.balance -= amount;
+  senderWallet.balance -= totalAmount;
   receiverWallet.balance += amount;
 
   await senderWallet.save();
@@ -61,7 +91,18 @@ const sendMoney = async (senderId: string, receiverPhone: string, amount: number
     type: 'send',
     description: `Sent to ${receiver.phone}`,
   });
+
+  if (fee > 0) {
+    await Transaction.create({
+      from: sender._id,
+      to: null,
+      amount: fee,
+      type: 'fee',
+      description: 'Transaction fee',
+    });
+  }
 };
+
 
 const agentCashIn = async (agentId: string, receiverPhone: string, amount: number) => {
   const agent = await User.findById(agentId);
@@ -142,11 +183,19 @@ const getAllTransactions = async () => {
   return Transaction.find().sort({ createdAt: -1 });
 }
 const getAgentCommission = async (agentId: string) => {
-  return Transaction.find({
+  const commissions = await Transaction.find({
     from: agentId,
     commission: { $gt: 0 },
   }).sort({ createdAt: -1 });
+
+  const total = commissions.reduce((sum, tx) => sum + (tx.commission || 0), 0);
+
+  return {
+    totalCommission: total,
+    data: commissions
+  };
 };
+
 
 export const TransactionService = {
   addMoney,
