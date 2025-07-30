@@ -64,6 +64,7 @@ const sendMoney = async (senderId: string, receiverPhone: string, amount: number
 };
 
 const agentCashIn = async (agentId: string, receiverPhone: string, amount: number) => {
+  const commission = amount * 0.02;
   const receiver = await User.findOne({ phone: receiverPhone });
   const receiverWallet = await Wallet.findOne({ user: receiver?._id });
 
@@ -77,6 +78,7 @@ const agentCashIn = async (agentId: string, receiverPhone: string, amount: numbe
     to: receiver?._id,
     amount,
     type: 'cash-in',
+    commission,
     description: 'Agent cash-in',
   });
 };
@@ -100,15 +102,35 @@ const agentCashOut = async (agentId: string, userPhone: string, amount: number) 
   });
 };
 
-const getMyTransactions = async (userId: string) => {
-  return Transaction.find({
+const getMyTransactions = async (userId: string, page = 1, limit = 10) => {
+  const skip = (page - 1) * limit;
+
+  const transactions = await Transaction.find({
     $or: [{ from: userId }, { to: userId }],
-  }).sort({ createdAt: -1 });
-}
+  })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Transaction.countDocuments({
+    $or: [{ from: userId }, { to: userId }],
+  });
+
+  return {
+    data: transactions,
+    meta: { page, limit, total },
+  };
+};
 
 const getAllTransactions = async () => {
   return Transaction.find().sort({ createdAt: -1 });
 }
+const getAgentCommission = async (agentId: string) => {
+  return Transaction.find({
+    from: agentId,
+    commission: { $gt: 0 },
+  }).sort({ createdAt: -1 });
+};
 
 export const TransactionService = {
   addMoney,
@@ -117,5 +139,6 @@ export const TransactionService = {
   agentCashIn,
   agentCashOut,
   getMyTransactions,
-  getAllTransactions
+  getAllTransactions,
+  getAgentCommission
 }

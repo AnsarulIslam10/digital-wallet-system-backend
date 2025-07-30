@@ -9,5 +9,7 @@ const router = Router();
 
 router.post('/register', validateRequest(createUserZodSchema), UserControllers.createUser);
 router.get('/all-users', checkAuth(Role.ADMIN), UserControllers.getAllUsers);
+router.patch('/agent/approve/:agentId', checkAuth(Role.ADMIN), UserControllers.approveAgent);
+router.patch('/agent/suspend/:agentId', checkAuth(Role.ADMIN), UserControllers.suspendAgent);
 
 export const UserRoutes = router;

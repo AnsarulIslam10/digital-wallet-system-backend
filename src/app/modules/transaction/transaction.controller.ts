@@ -79,7 +79,17 @@ const getAll = catchAsync(async (_req: Request, res: Response) => {
         data: result,
     });
 })
+const getAgentCommissions = catchAsync(async (req: Request, res: Response) => {
+  const agentId = req.user.userId;
+  const result = await TransactionService.getAgentCommission(agentId);
 
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Commission history retrieved',
+    data: result,
+  });
+});
 export const TransactionController = {
     addMoney,
     withdrawMoney,
@@ -88,5 +98,6 @@ export const TransactionController = {
     agentCashOut,
     getMyHistory,
     getAll,
+    getAgentCommissions
 
 }

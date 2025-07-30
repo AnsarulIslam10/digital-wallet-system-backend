@@ -7,6 +7,7 @@ export interface ITransaction extends Document {
   to?: Types.ObjectId;
   amount: number;
   type: TransactionType;
+  commission?: number;
   description?: string;
   createdAt: Date;
 }

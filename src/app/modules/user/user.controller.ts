@@ -34,8 +34,30 @@ const getAllUsers = catchAsync(
     });
   }
 );
+const approveAgent = catchAsync(async (req: Request, res: Response) => {
+  const { agentId } = req.params;
+  const result = await UserServices.updateApprovalStatus(agentId, true);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Agent approved",
+    data: result,
+  });
+});
 
+const suspendAgent = catchAsync(async (req: Request, res: Response) => {
+  const { agentId } = req.params;
+  const result = await UserServices.updateApprovalStatus(agentId, false);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Agent suspended",
+    data: result,
+  });
+});
 export const UserControllers = {
   createUser,
   getAllUsers,
+  approveAgent,
+  suspendAgent
 };

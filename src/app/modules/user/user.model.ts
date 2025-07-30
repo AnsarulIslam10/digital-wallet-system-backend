@@ -4,19 +4,31 @@ import { IUser, Role } from "./user.interface";
 
 
 const userSchema = new Schema<IUser>({
-    name: { type: String, required: true },
-    phone: { type: String, required: true, unique: true },
-    email: { type: String, unique: true, sparse: true },
-    password: { type: String, required: true },
-    role: {
-        type: String,
-        enum: Object.values(Role),
-        default: Role.USER
-    },
-    isBlocked: { type: Boolean, default: false },
+  name: { type: String, required: true },
+  phone: { type: String, required: true, unique: true },
+  email: {
+    type: String,
+    unique: true,
+    sparse: true,
+    trim: true,
+  },
+  password: { type: String, required: true },
+  role: {
+    type: String,
+    enum: Object.values(Role),
+    default: Role.USER
+  },
+  isBlocked: { type: Boolean, default: false },
+  isApproved: {
+    type: Boolean,
+    default: function (this: IUser) {
+      return this.role !== Role.AGENT;
+    }
+  },
+
 }, {
-    timestamps: true,
-    versionKey: false,
+  timestamps: true,
+  versionKey: false,
 })
 
 // Auto create wallet
