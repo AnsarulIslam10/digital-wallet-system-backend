@@ -5,17 +5,17 @@ import { Role } from '../user/user.interface';
 import { validateRequest } from '../../middlewares/validateRequest';
 import {
   addMoneyValidation,
-  cashOutValidation,
   sendMoneyValidation,
   agentCashInValidation,
   agentCashOutValidation,
+  withdrawMoneyValidation,
 } from './transaction.validation';
 
 const router = express.Router();
 
 // USER routes
 router.post('/add', checkAuth(Role.USER), validateRequest(addMoneyValidation), TransactionController.addMoney);
-router.post('/withdraw', checkAuth(Role.USER), validateRequest(cashOutValidation), TransactionController.withdrawMoney);
+router.post('/withdraw', checkAuth(Role.USER), validateRequest(withdrawMoneyValidation), TransactionController.withdrawMoney);
 router.post('/send', checkAuth(Role.USER), validateRequest(sendMoneyValidation), TransactionController.sendMoney);
 
 // AGENT routes
