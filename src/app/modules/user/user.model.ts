@@ -31,16 +31,18 @@ const userSchema = new Schema<IUser>({
   versionKey: false,
 })
 
-// Auto create wallet
 userSchema.post('save', async function (user) {
-  await Wallet.create({
-    user: user._id,
-    userInfo: {
-      name: user.name,
-      phone: user.phone,
-    },
-    balance: 50,
-  });
+  const existingWallet = await Wallet.findOne({ user: user._id });
+  if (!existingWallet) {
+    await Wallet.create({
+      user: user._id,
+      userInfo: {
+        name: user.name,
+        phone: user.phone,
+      },
+      balance: 50,
+    });
+  }
 });
 
 export const User = model<IUser>("User", userSchema)

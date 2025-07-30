@@ -16,7 +16,7 @@ export const cashOutValidation = z.object({
 
 export const agentCashInValidation = z.object({
   amount: z.number().positive("Amount must be a positive number"),
-  userPhone: z.string().min(10, "User phone number must be at least 10 digits"),
+  receiverPhone: z.string().min(10, "User phone number must be at least 10 digits"),
 });
 
 export const agentCashOutValidation = z.object({

@@ -64,6 +64,14 @@ const sendMoney = async (senderId: string, receiverPhone: string, amount: number
 };
 
 const agentCashIn = async (agentId: string, receiverPhone: string, amount: number) => {
+  const agent = await User.findById(agentId);
+  if (!agent || agent.role !== 'agent') {
+    throw new AppError(400, 'Only agents can perform cash-in');
+  }
+  if (!agent.isApproved) {
+    throw new AppError(403, 'Agent is not approved yet');
+  }
+
   const commission = amount * 0.02;
   const receiver = await User.findOne({ phone: receiverPhone });
   const receiverWallet = await Wallet.findOne({ user: receiver?._id });
@@ -84,6 +92,14 @@ const agentCashIn = async (agentId: string, receiverPhone: string, amount: numbe
 };
 
 const agentCashOut = async (agentId: string, userPhone: string, amount: number) => {
+  const agent = await User.findById(agentId);
+  if (!agent || agent.role !== 'agent') {
+    throw new AppError(400, 'Only agents can perform cash-out');
+  }
+  if (!agent.isApproved) {
+    throw new AppError(403, 'Agent is not approved yet');
+  }
+
   const sender = await User.findOne({ phone: userPhone });
   const senderWallet = await Wallet.findOne({ user: sender?._id });
 
