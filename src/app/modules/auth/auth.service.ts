@@ -6,37 +6,52 @@ import { IUser } from "../user/user.interface";
 import { User } from '../user/user.model';
 import { generateToken } from "../../utils/jwt";
 import { envVars } from "../../config/env";
+
 const credentialsLogin = async (payload: Partial<IUser>) => {
-    const { phone, password } = payload;
-    const isUserExist = await User.findOne({ phone })
-    if (!isUserExist) {
-        throw new AppError(httpStatus.BAD_REQUEST, "User does not exist")
-    }
+  const { phone, password } = payload;
 
-    const isPasswordMatched = await bcryptjs.compare(password as string, isUserExist.password as string)
+  const isUserExist = await User.findOne({ phone });
+  if (!isUserExist) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User does not exist");
+  }
 
-    if (!isPasswordMatched) {
-        throw new AppError(httpStatus.BAD_REQUEST, "Incorrect Password")
-    }
+  const isPasswordMatched = await bcryptjs.compare(
+    password as string,
+    isUserExist.password as string
+  );
 
-    const jwtPayload = {
-        userId: isUserExist._id,
-        phone: isUserExist.phone,
-        role: isUserExist.role
-    }
-    const accessToken = generateToken(jwtPayload, envVars.JWT_ACCESS_SECRET, envVars.JWT_ACCESS_EXPIRES)
+  if (!isPasswordMatched) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Incorrect Password");
+  }
 
-    const refreshToken = generateToken(jwtPayload, envVars.JWT_REFRESH_SECRET, envVars.JWT_REFRESH_EXPIRES)
+  const jwtPayload = {
+    userId: isUserExist._id,
+    phone: isUserExist.phone,
+    role: isUserExist.role,
+  };
 
-    // delete isUserExist.password;
-    const {password: pass, ...rest} = isUserExist
+  const accessToken = generateToken(
+    jwtPayload,
+    envVars.JWT_ACCESS_SECRET,
+    envVars.JWT_ACCESS_EXPIRES
+  );
 
-    return {
-        accessToken,
-        refreshToken,
-        user: rest
-    }
-}
+  const refreshToken = generateToken(
+    jwtPayload,
+    envVars.JWT_REFRESH_SECRET,
+    envVars.JWT_REFRESH_EXPIRES
+  );
+
+  const userObj = isUserExist.toObject();
+  const { password: pass, ...rest } = userObj;
+
+  return {
+    accessToken,
+    refreshToken,
+    user: rest,
+  };
+};
+
 
 export const AuthServices = {
     credentialsLogin
