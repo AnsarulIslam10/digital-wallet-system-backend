@@ -9,10 +9,10 @@ exports.globalErrorHandler = void 0;
 const zod_1 = require("zod");
 const env_1 = require("../config/env");
 const AppError_1 = __importDefault(require("../errorHelpers/AppError"));
-const globalErrorHandler = (err, req, res, next) => {
+const globalErrorHandler = (err, req, res, _next) => {
     let statusCode = 500;
     let message = 'Something went wrong';
-    let errorDetails = err;
+    let errors = undefined;
     // Handle custom AppError
     if (err instanceof AppError_1.default) {
         statusCode = err.statusCode;
@@ -22,7 +22,7 @@ const globalErrorHandler = (err, req, res, next) => {
     else if (err instanceof zod_1.ZodError) {
         statusCode = 400;
         message = 'Validation Error';
-        errorDetails = err.issues.map((issue) => ({
+        errors = err.issues.map((issue) => ({
             field: issue.path.join('.'),
             message: issue.message,
         }));
@@ -31,12 +31,16 @@ const globalErrorHandler = (err, req, res, next) => {
     else if (err instanceof Error) {
         message = err.message;
     }
-    res.status(statusCode).json({
+    // Build response
+    const responsePayload = {
         success: false,
         statusCode,
         message,
-        errors: errorDetails,
-        stack: env_1.envVars.NODE_ENV === 'development' ? err.stack : undefined,
-    });
+    };
+    if (errors)
+        responsePayload.errors = errors;
+    if (env_1.envVars.NODE_ENV === 'development')
+        responsePayload.stack = err.stack;
+    res.status(statusCode).json(responsePayload);
 };
 exports.globalErrorHandler = globalErrorHandler;
