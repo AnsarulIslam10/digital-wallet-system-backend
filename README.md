@@ -1,61 +1,66 @@
 # 💸 Digital Wallet API
 
-A secure, modular, and role-based RESTful backend API for a digital wallet system (like Bkash or Nagad), built with **Express.js**, **Mongoose**, **TypeScript**, and **Zod**. Users can register, manage wallets, perform financial operations, and access role-specific features.
+A secure, modular, and role-based RESTful backend API for a digital wallet system (inspired by **Bkash**/**Nagad**), built with **Express.js**, **Mongoose**, **TypeScript**, and **Zod**. This system allows users to register, manage wallets, perform transactions, and interact based on roles (`admin`, `user`, `agent`).
 
 ---
 
-## 🧩 Tech Stack
+## 📦 Tech Stack
 
-- **Backend Framework:** Express.js
+- **Framework:** Express.js
 - **Language:** TypeScript
-- **Database:** MongoDB with Mongoose
-- **Auth:** JWT + Bcrypt
+- **Database:** MongoDB (via Mongoose)
+- **Authentication:** JWT (Access & Refresh tokens)
+- **Password Hashing:** Bcrypt
 - **Validation:** Zod
-- **Architecture:** Modular MVC
+- **Architecture:** Modular MVC Pattern
 
 ---
 
-## 🧱 Project Features
+## 🌐 Live Backend URL
+
+> ✅ [https://digital-wallet-system-backend.vercel.app](https://digital-wallet-system-backend.vercel.app)
+
+Use this as the base URL when testing endpoints.
+
+---
+
+## ✨ Key Features
 
 ### 🔐 Authentication
-- JWT-based access & refresh tokens
+- JWT-based access & refresh token system
 - Secure password hashing using Bcrypt
 
-### 👥 User Roles
-- `admin`, `user`, `agent`
-- Role-based route protection middleware
+### 👥 Role-Based Access
+- Roles: `admin`, `user`, `agent`
+- Middleware-based role protection
 
-### 👤 User Functionality
-- Register/login
-- Auto-wallet creation with ৳50 balance
-- Add money (top-up)
-- Withdraw money
-- Send money (with transaction fee)
-- View wallet
-- View transaction history (paginated)
+### 👤 User Features
+- Registration & Login
+- Auto-wallet creation with initial ৳50 balance
+- Add, Withdraw, Send Money
+- Daily send limit enforcement
+- View Wallet & Transaction History (paginated)
 
-### 🧑‍💼 Agent Functionality
-- Cash-in to user wallet
-- Cash-out from user wallet
-- View commission history
+### 🧑‍💼 Agent Features
+- Cash-in (deposit) to user wallet
+- Cash-out (withdraw) from user wallet
+- View commission earnings (2% per cash-in)
 
-### 👮 Admin Functionality
+### 🛡️ Admin Features
 - View all users, agents, wallets, and transactions
-- Block/unblock any wallet
-- Approve/suspend agents
+- Block/Unblock wallets
+- Approve/Suspend agent accounts
 
-### 💸 Transactions
-- All transactions are tracked and stored
-- Types: `add`, `withdraw`, `send`, `cash-in`, `cash-out`, `fee`
-- Commission (2%) for agents on cash-in
-- Configurable transaction fee
-- Daily send limit enforced
+### 💸 Transaction System
+- Tracks every action: `add`, `withdraw`, `send`, `cash-in`, `cash-out`, `fee`
+- Configurable fee system
+- Agent commissions handled automatically
 
 ---
 
 ## ⚙️ Environment Setup
 
-Create a `.env` file in the root directory with the following:
+Create a `.env` file in the root:
 
 ```env
 PORT=5000
@@ -74,91 +79,79 @@ DAILY_SEND_LIMIT=10000
 
 ---
 
-## 🚀 Run Locally
+## 🚀 Run the Project Locally
 
 ```bash
 # Install dependencies
 npm install
 
-# Start dev server
+# Run in development mode
 npm run dev
 ```
 
 ---
 
-## 🔁 API Endpoints Summary
+## 📮 API Endpoints Overview
+
+> 🌐 **Base URL:** `https://digital-wallet-system-backend.vercel.app`
 
 ### 🔐 Auth
 
-| Method | Endpoint      | Description                 |
-| ------ | ------------- | --------------------------- |
-| POST   | `/auth/login` | Login with phone & password |
+| Method | Endpoint      | Description                  |
+| ------ | ------------- | ---------------------------- |
+| POST   | `/auth/login` | Login using phone & password |
 
 ---
 
-### 👤 User
+### 👤 User Management
 
-| Method | Endpoint                  | Role   | Description            |
-| ------ | ------------------------- | ------ | ---------------------- |
-| POST   | `/api/v1/user/register`          | Public | Register user or agent |
-| GET    | `/api/v1/user/all-users`         | Admin  | Get all users          |
-| PATCH  | `/api/v1/user/agent/approve/:id` | Admin  | Approve agent          |
-| PATCH  | `/api/v1/user/agent/suspend/:id` | Admin  | Suspend agent          |
+| Method | Endpoint                         | Role   | Description               |
+| ------ | -------------------------------- | ------ | ------------------------- |
+| POST   | `/api/v1/user/register`          | Public | Register new user/agent   |
+| GET    | `/api/v1/user/all-users`         | Admin  | View all registered users |
+| PATCH  | `/api/v1/user/agent/approve/:id` | Admin  | Approve an agent          |
+| PATCH  | `/api/v1/user/agent/suspend/:id` | Admin  | Suspend an agent          |
 
 ---
 
-### 💰 Wallet
+### 💰 Wallet Operations
 
-| Method | Endpoint              | Role  | Description      |
-| ------ | --------------------- | ----- | ---------------- |
-| GET    | `/api/v1/wallet/my-wallet`   | All   | View my wallet   |
-| GET    | `/api/v1/wallet/all-wallets` | Admin | View all wallets |
-| PATCH  | `/api/v1/wallet/block/:id`   | Admin | Block a wallet   |
-| PATCH  | `/api/v1/wallet/unblock/:id` | Admin | Unblock a wallet |
+| Method | Endpoint                     | Role  | Description             |
+| ------ | ---------------------------- | ----- | ----------------------- |
+| GET    | `/api/v1/wallet/my-wallet`   | All   | View own wallet details |
+| GET    | `/api/v1/wallet/all-wallets` | Admin | View all wallets        |
+| PATCH  | `/api/v1/wallet/block/:id`   | Admin | Block a wallet          |
+| PATCH  | `/api/v1/wallet/unblock/:id` | Admin | Unblock a wallet        |
 
 ---
 
 ### 🔁 Transactions
 
-| Method | Endpoint                      | Role       | Description                           |
-| ------ | ----------------------------- | ---------- | ------------------------------------- |
-| POST   | `/api/v1/transaction/add`            | User       | Add money (top-up)                    |
-| POST   | `/api/v1/transaction/withdraw`       | User       | Withdraw money                        |
+| Method | Endpoint                             | Role       | Description                           |
+| ------ | ------------------------------------ | ---------- | ------------------------------------- |
+| POST   | `/api/v1/transaction/add`            | User       | Add money to wallet                   |
+| POST   | `/api/v1/transaction/withdraw`       | User       | Withdraw from wallet                  |
 | POST   | `/api/v1/transaction/send`           | User       | Send money to another user (with fee) |
-| GET    | `/api/v1/transaction/my-history`     | User/Agent | View transaction history (paginated)  |
-| POST   | `/api/v1/transaction/cash-in`        | Agent      | Add money to user wallet              |
-| POST   | `/api/v1/transaction/cash-out`       | Agent      | Withdraw from user wallet             |
-| GET    | `/api/v1/transaction/my-commissions` | Agent      | View agent commissions                |
+| GET    | `/api/v1/transaction/my-history`     | User/Agent | View own transactions (paginated)     |
+| POST   | `/api/v1/transaction/cash-in`        | Agent      | Cash-in to user wallet                |
+| POST   | `/api/v1/transaction/cash-out`       | Agent      | Cash-out from user wallet             |
+| GET    | `/api/v1/transaction/my-commissions` | Agent      | View commission history               |
 | GET    | `/api/v1/transaction`                | Admin      | View all transactions                 |
 
 ---
 
-## 🧪 Testing the API
+## 🧪 Test with Postman
 
-* Use [Postman](https://www.postman.com/) or Thunder Client
-* Include `Authorization: Bearer <access_token>` for protected routes
-* Test all major use cases:
+✅ Use this shared Postman collection to test all endpoints:
 
-  * Registration/login
-  * Wallet ops (add, withdraw, send)
-  * Role-based access
-  * Agent cash-in/cash-out
-  * Admin blocking/unblocking
+📥 [Download Postman Collection](https://drive.google.com/file/d/1vRJ4ArZCecQzOi-sFadmBdfjgjmguMXl/view?usp=sharing)
+
+> ✅ **Set Base URL:** `https://digital-wallet-system-backend.vercel.app`
+for protected routes
 
 ---
 
-## 🎥 Demo Video (Submitted Separately)
-
-* ✅ Intro + overview
-* ✅ Folder structure walkthrough
-* ✅ Auth & role logic demo
-* ✅ User & agent transactions
-* ✅ Admin panel features
-* ✅ Postman testing in real time
-
----
-
-## 📁 Folder Structure
+## 🗂 Folder Structure
 
 ```
 src/
@@ -177,23 +170,10 @@ src/
     └── routes/
 ```
 
----
+## 👨‍💻 Developer
 
-## ✨ Author
-
-**Ansarul Islam Riyad**
-Chapainawabganj Polytechnic Institute
-8th Semester, Diploma in Computer Technology
+**Ansarul Islam**
+📍 Northern University Bangladesh
+🎓 1th Semester, Computer Science and Engineering (CSE)
 
 ---
-
-## 📄 License
-
-This project is for academic purposes only.
-
-```
-
----
-
-Let me know if you'd like the `README.md` translated into Bangla or want badges, screenshots, or links added.
-```
