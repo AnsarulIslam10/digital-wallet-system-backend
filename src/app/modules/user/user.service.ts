@@ -44,6 +44,12 @@ const getAllUsers = async () => {
     },
   };
 };
+const getMe = async (userId: string) => {
+    const user = await User.findById(userId).select("-password");
+    return {
+        data: user
+    }
+};
 
 const updateApprovalStatus = async (agentId: string, status: boolean) => {
   const user = await User.findById(agentId);
@@ -58,5 +64,6 @@ const updateApprovalStatus = async (agentId: string, status: boolean) => {
 export const UserServices = {
   createUser,
   getAllUsers,
+  getMe,
   updateApprovalStatus
 };
