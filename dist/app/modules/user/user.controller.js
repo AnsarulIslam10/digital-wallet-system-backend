@@ -36,6 +36,16 @@ const getAllUsers = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(v
         meta: result.meta,
     });
 }));
+const getMe = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const decodedToken = req.user;
+    const result = yield user_service_1.UserServices.getMe(decodedToken.userId);
+    (0, sendResponse_1.sendResponse)(res, {
+        success: true,
+        statusCode: http_status_codes_1.default.CREATED,
+        message: "Your profile Retrieved Successfully",
+        data: result.data
+    });
+}));
 const approveAgent = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { agentId } = req.params;
     const result = yield user_service_1.UserServices.updateApprovalStatus(agentId, true);
@@ -59,6 +69,7 @@ const suspendAgent = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0
 exports.UserControllers = {
     createUser,
     getAllUsers,
+    getMe,
     approveAgent,
     suspendAgent
 };
