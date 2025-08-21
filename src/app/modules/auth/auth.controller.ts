@@ -5,9 +5,16 @@ import { catchAsync } from "../../utils/catchAsync"
 
 import { AuthServices } from './auth.service';
 import { sendResponse } from '../../utils/sendResponse';
+import { setAuthCookie } from '../../utils/setCookie';
 
 const credentialsLogin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const loginInfo = await AuthServices.credentialsLogin(req.body)
+
+    setAuthCookie(res, {
+        accessToken: loginInfo.accessToken,
+        refreshToken: loginInfo.refreshToken
+    })
+    
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.OK,

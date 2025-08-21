@@ -30,6 +30,8 @@ const createUser = async (payload: Partial<IUser>) => {
 
   const user = await User.create(userData);
 
+  
+
   return user;
 };
 

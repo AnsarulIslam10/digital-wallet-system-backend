@@ -19,24 +19,43 @@ const catchAsync_1 = require("../../utils/catchAsync");
 const auth_service_1 = require("./auth.service");
 const sendResponse_1 = require("../../utils/sendResponse");
 const credentialsLogin = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const loginInfo = yield auth_service_1.AuthServices.credentialsLogin(req.body);
+    // Service should return { accessToken, refreshToken, user }
+    const { accessToken, refreshToken, user } = yield auth_service_1.AuthServices.credentialsLogin(req.body);
+    // ======================
+    // Set cookies for tokens
+    // ======================
+    res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // only secure in prod
+        sameSite: "none", // allow cross-origin cookies
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "none",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+    // Send response without tokens in body
     (0, sendResponse_1.sendResponse)(res, {
         success: true,
         statusCode: http_status_codes_1.default.OK,
         message: "User Logged In Successfully",
-        data: loginInfo
+        data: {
+            user, // expose safe user info only
+        },
     });
 }));
 const logout = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     res.clearCookie("accessToken", {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax"
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "none",
     });
     res.clearCookie("refreshToken", {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax"
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "none",
     });
     (0, sendResponse_1.sendResponse)(res, {
         success: true,
@@ -47,5 +66,5 @@ const logout = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0
 }));
 exports.AuthControllers = {
     credentialsLogin,
-    logout
+    logout,
 };

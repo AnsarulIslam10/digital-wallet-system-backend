@@ -8,7 +8,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const lodaEnvVariables = () => {
     const requiredEnvVariables = ["PORT", "DB_URL", "NODE_ENV", "BCRYPT_SALT_ROUND", "JWT_ACCESS_SECRET", "JWT_ACCESS_EXPIRES", "JWT_REFRESH_SECRET", "JWT_REFRESH_EXPIRES", 'TRANSACTION_FEE_PERCENT',
-        'DAILY_SEND_LIMIT',];
+        'DAILY_SEND_LIMIT', "FRONTEND_URL",];
     requiredEnvVariables.forEach(key => {
         if (!process.env[key]) {
             throw new Error(`Missing require environment variable ${key}`);
@@ -25,6 +25,7 @@ const lodaEnvVariables = () => {
         JWT_REFRESH_EXPIRES: process.env.JWT_REFRESH_EXPIRES,
         TRANSACTION_FEE_PERCENT: Number(process.env.TRANSACTION_FEE_PERCENT),
         DAILY_SEND_LIMIT: Number(process.env.DAILY_SEND_LIMIT),
+        FRONTEND_URL: process.env.FRONTEND_URL,
     };
 };
 exports.envVars = lodaEnvVariables();
