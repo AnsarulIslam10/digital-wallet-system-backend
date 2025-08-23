@@ -175,25 +175,43 @@ const agentCashOut = async (agentId: string, userPhone: string, amount: number) 
   });
 };
 
-const getMyTransactions = async (userId: string, page = 1, limit = 10) => {
+const getMyTransactions = async (
+  userId: string,
+  page = 1,
+  limit = 10,
+  type?: string
+) => {
   const skip = (page - 1) * limit;
 
-  const transactions = await Transaction.find({
+  const filter: Record<string, unknown> = {
     $or: [{ from: userId }, { to: userId }],
-  })
+  };
+
+  if (type) {
+    filter.type = type; // assumes your Transaction model has a "type" field
+  }
+
+  const transactions = await Transaction.find(filter)
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
 
-  const total = await Transaction.countDocuments({
-    $or: [{ from: userId }, { to: userId }],
-  });
+  const total = await Transaction.countDocuments(filter);
+
+  const totalPages = Math.ceil(total / limit);
 
   return {
     data: transactions,
-    meta: { page, limit, total },
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages,
+    },
   };
 };
+
+
 
 const getAllTransactions = async () => {
   return Transaction.find().sort({ createdAt: -1 });

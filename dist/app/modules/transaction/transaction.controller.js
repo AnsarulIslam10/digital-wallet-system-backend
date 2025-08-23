@@ -66,12 +66,16 @@ const agentCashOut = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0
         data: result
     });
 }));
+// controller
 const getMyHistory = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield transaction_service_1.TransactionService.getMyTransactions(req.user.userId);
+    var _a;
+    const { page = 1, limit = 10, type } = req.query;
+    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a._id;
+    const result = yield transaction_service_1.TransactionService.getMyTransactions(userId, Number(page), Number(limit), type);
     (0, sendResponse_1.sendResponse)(res, {
-        statusCode: http_status_codes_1.default.OK,
+        statusCode: 200,
         success: true,
-        message: 'Transaction history retrieved',
+        message: "Transaction history retrieved",
         data: result,
     });
 }));

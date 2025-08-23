@@ -170,20 +170,28 @@ const agentCashOut = (agentId, userPhone, amount) => __awaiter(void 0, void 0, v
         description: 'Agent cash-out',
     });
 });
-const getMyTransactions = (userId_1, ...args_1) => __awaiter(void 0, [userId_1, ...args_1], void 0, function* (userId, page = 1, limit = 10) {
+const getMyTransactions = (userId_1, ...args_1) => __awaiter(void 0, [userId_1, ...args_1], void 0, function* (userId, page = 1, limit = 10, type) {
     const skip = (page - 1) * limit;
-    const transactions = yield transaction_model_1.Transaction.find({
+    const filter = {
         $or: [{ from: userId }, { to: userId }],
-    })
+    };
+    if (type) {
+        filter.type = type; // assumes your Transaction model has a "type" field
+    }
+    const transactions = yield transaction_model_1.Transaction.find(filter)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
-    const total = yield transaction_model_1.Transaction.countDocuments({
-        $or: [{ from: userId }, { to: userId }],
-    });
+    const total = yield transaction_model_1.Transaction.countDocuments(filter);
+    const totalPages = Math.ceil(total / limit);
     return {
         data: transactions,
-        meta: { page, limit, total },
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages,
+        },
     };
 });
 const getAllTransactions = () => __awaiter(void 0, void 0, void 0, function* () {

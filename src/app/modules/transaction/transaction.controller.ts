@@ -5,24 +5,24 @@ import { sendResponse } from '../../utils/sendResponse';
 import { TransactionService } from './transaction.service';
 
 const addMoney = catchAsync(async (req: Request, res: Response) => {
-    const result = await TransactionService.addMoney(req.user.userId, req.body.amount);
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: 'Money added successfully',
-        data: result,
-    });
+  const result = await TransactionService.addMoney(req.user.userId, req.body.amount);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Money added successfully',
+    data: result,
+  });
 })
 
 const withdrawMoney = catchAsync(async (req: Request, res: Response) => {
-    const { amount, password } = req.body;
-    const result = await TransactionService.withdrawMoney(req.user.userId, amount, password);
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: 'Money withdrawn successfully',
-        data: result,
-    });
+  const { amount, password } = req.body;
+  const result = await TransactionService.withdrawMoney(req.user.userId, amount, password);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Money withdrawn successfully',
+    data: result,
+  });
 });
 
 
@@ -64,23 +64,33 @@ const agentCashOut = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getMyHistory = catchAsync(async (req: Request, res: Response) => {
-    const result = await TransactionService.getMyTransactions(req.user.userId);
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: 'Transaction history retrieved',
-        data: result,
-    });
-})
+  const { page = 1, limit = 10, type } = req.query;
+  const userId = req.user?._id;
+
+  const result = await TransactionService.getMyTransactions(
+    userId,
+    Number(page),
+    Number(limit),
+    type as string | undefined
+  );
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Transaction history retrieved",
+    data: result,
+  });
+});
+
 
 const getAll = catchAsync(async (_req: Request, res: Response) => {
-    const result = await TransactionService.getAllTransactions();
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: 'All transactions retrieved',
-        data: result,
-    });
+  const result = await TransactionService.getAllTransactions();
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'All transactions retrieved',
+    data: result,
+  });
 })
 const getAgentCommissions = catchAsync(async (req: Request, res: Response) => {
   const agentId = req.user.userId;
@@ -94,13 +104,13 @@ const getAgentCommissions = catchAsync(async (req: Request, res: Response) => {
   });
 });
 export const TransactionController = {
-    addMoney,
-    withdrawMoney,
-    sendMoney,
-    agentCashIn,
-    agentCashOut,
-    getMyHistory,
-    getAll,
-    getAgentCommissions
+  addMoney,
+  withdrawMoney,
+  sendMoney,
+  agentCashIn,
+  agentCashOut,
+  getMyHistory,
+  getAll,
+  getAgentCommissions
 
 }
