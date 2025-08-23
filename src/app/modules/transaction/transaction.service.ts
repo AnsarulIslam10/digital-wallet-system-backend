@@ -130,12 +130,17 @@ const agentCashIn = async (agentId: string, receiverPhone: string, amount: numbe
   }
 
   const commission = amount * 0.02;
+
   const receiver = await User.findOne({ phone: receiverPhone });
   const receiverWallet = await Wallet.findOne({ user: receiver?._id });
 
-  if (!receiverWallet || receiverWallet.isBlocked) throw new AppError(403, 'Receiver wallet is blocked');
+  if (!receiverWallet) {
+    throw new AppError(404, 'Receiver wallet not found');
+  }
 
-  receiverWallet.balance += amount;
+  if (receiverWallet.isBlocked) {
+    throw new AppError(403, 'Receiver wallet is blocked');
+  };
   await receiverWallet.save();
 
   await Transaction.create({

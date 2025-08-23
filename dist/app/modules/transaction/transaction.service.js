@@ -133,9 +133,13 @@ const agentCashIn = (agentId, receiverPhone, amount) => __awaiter(void 0, void 0
     const commission = amount * 0.02;
     const receiver = yield user_model_1.User.findOne({ phone: receiverPhone });
     const receiverWallet = yield wallet_model_1.Wallet.findOne({ user: receiver === null || receiver === void 0 ? void 0 : receiver._id });
-    if (!receiverWallet || receiverWallet.isBlocked)
+    if (!receiverWallet) {
+        throw new AppError_1.default(404, 'Receiver wallet not found');
+    }
+    if (receiverWallet.isBlocked) {
         throw new AppError_1.default(403, 'Receiver wallet is blocked');
-    receiverWallet.balance += amount;
+    }
+    ;
     yield receiverWallet.save();
     yield transaction_model_1.Transaction.create({
         from: agentId,
