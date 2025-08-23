@@ -37,8 +37,8 @@ const withdrawMoney = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 
     });
 }));
 const sendMoney = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { receiverPhone, amount } = req.body;
-    const result = yield transaction_service_1.TransactionService.sendMoney(req.user.userId, receiverPhone, amount);
+    const { receiverPhone, amount, password } = req.body;
+    const result = yield transaction_service_1.TransactionService.sendMoney(req.user.userId, receiverPhone, amount, password);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
         success: true,

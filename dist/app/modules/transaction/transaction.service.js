@@ -55,8 +55,15 @@ const withdrawMoney = (userId, amount, password) => __awaiter(void 0, void 0, vo
     });
     return { balance: wallet.balance };
 });
-const sendMoney = (senderId, receiverPhone, amount) => __awaiter(void 0, void 0, void 0, function* () {
+const sendMoney = (senderId, receiverPhone, amount, password) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
+    const sender = yield user_model_1.User.findById(senderId).select("+password");
+    if (!sender)
+        throw new AppError_1.default(404, 'Sender not found');
+    // Password verification
+    const isMatch = yield bcryptjs_1.default.compare(password, sender.password);
+    if (!isMatch)
+        throw new AppError_1.default(400, 'Invalid password');
     const feeRate = env_1.envVars.TRANSACTION_FEE_PERCENT || 0;
     const fee = (amount * feeRate) / 100;
     const totalAmount = amount + fee;
@@ -82,10 +89,9 @@ const sendMoney = (senderId, receiverPhone, amount) => __awaiter(void 0, void 0,
     if (totalSent + amount > env_1.envVars.DAILY_SEND_LIMIT) {
         throw new AppError_1.default(400, 'Daily send limit exceeded');
     }
-    const sender = yield user_model_1.User.findById(senderId);
     const receiver = yield user_model_1.User.findOne({ phone: receiverPhone });
-    if (!sender || !receiver)
-        throw new AppError_1.default(404, 'Sender or receiver not found');
+    if (!receiver)
+        throw new AppError_1.default(404, 'Receiver not found');
     const senderWallet = yield wallet_model_1.Wallet.findOne({ user: sender._id });
     const receiverWallet = yield wallet_model_1.Wallet.findOne({ user: receiver._id });
     if (!senderWallet || senderWallet.isBlocked)
@@ -114,6 +120,7 @@ const sendMoney = (senderId, receiverPhone, amount) => __awaiter(void 0, void 0,
             description: 'Transaction fee',
         });
     }
+    return { balance: senderWallet.balance };
 });
 const agentCashIn = (agentId, receiverPhone, amount) => __awaiter(void 0, void 0, void 0, function* () {
     const agent = yield user_model_1.User.findById(agentId);

@@ -45,7 +45,14 @@ const withdrawMoney = async (userId: string, amount: number, password: string) =
   return { balance: wallet.balance };
 };
 
-const sendMoney = async (senderId: string, receiverPhone: string, amount: number) => {
+const sendMoney = async (senderId: string, receiverPhone: string, amount: number, password: string) => {
+  const sender = await User.findById(senderId).select("+password");
+  if (!sender) throw new AppError(404, 'Sender not found');
+
+  // Password verification
+  const isMatch = await bcrypt.compare(password, sender.password);
+  if (!isMatch) throw new AppError(400, 'Invalid password');
+
   const feeRate = envVars.TRANSACTION_FEE_PERCENT || 0;
   const fee = (amount * feeRate) / 100;
   const totalAmount = amount + fee;
@@ -74,10 +81,8 @@ const sendMoney = async (senderId: string, receiverPhone: string, amount: number
     throw new AppError(400, 'Daily send limit exceeded');
   }
 
-  const sender = await User.findById(senderId);
   const receiver = await User.findOne({ phone: receiverPhone });
-
-  if (!sender || !receiver) throw new AppError(404, 'Sender or receiver not found');
+  if (!receiver) throw new AppError(404, 'Receiver not found');
 
   const senderWallet = await Wallet.findOne({ user: sender._id });
   const receiverWallet = await Wallet.findOne({ user: receiver._id });
@@ -109,7 +114,10 @@ const sendMoney = async (senderId: string, receiverPhone: string, amount: number
       description: 'Transaction fee',
     });
   }
+
+  return { balance: senderWallet.balance };
 };
+
 
 
 const agentCashIn = async (agentId: string, receiverPhone: string, amount: number) => {

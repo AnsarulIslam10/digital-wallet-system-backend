@@ -27,8 +27,8 @@ const withdrawMoney = catchAsync(async (req: Request, res: Response) => {
 
 
 const sendMoney = catchAsync(async (req: Request, res: Response) => {
-  const { receiverPhone, amount } = req.body;
-  const result = await TransactionService.sendMoney(req.user.userId, receiverPhone, amount);
+  const { receiverPhone, amount, password } = req.body;
+  const result = await TransactionService.sendMoney(req.user.userId, receiverPhone, amount, password);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -37,6 +37,7 @@ const sendMoney = catchAsync(async (req: Request, res: Response) => {
     data: result
   });
 });
+
 
 const agentCashIn = catchAsync(async (req: Request, res: Response) => {
   const { receiverPhone, amount } = req.body;
