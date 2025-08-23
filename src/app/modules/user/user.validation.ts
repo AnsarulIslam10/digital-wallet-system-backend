@@ -26,3 +26,24 @@ export const createUserZodSchema = z.object({
         }),
     role: z.enum([Role.USER, Role.AGENT, Role.ADMIN]).optional()
 })
+
+export const updateUserZodSchema = z.object({
+  name: z
+    .string({ invalid_type_error: "Name must be string" })
+    .min(2, { message: "Name must be at least 2 characters long." })
+    .max(50, { message: "Name cannot exceed 50 characters." })
+    .optional(),
+  phone: z
+    .string({ invalid_type_error: "Phone must be string" })
+    .regex(/^(?:\+8801\d{9}|01\d{9})$/, {
+      message: "Phone number must be valid for Bangladesh. Format: +8801XXXXXXXXX or 01XXXXXXXXX",
+    })
+    .optional(),
+  currentPassword: z.string().optional(),
+  newPassword: z
+    .string()
+    .min(6, { message: "New password must be 6 digits" })
+    .max(6, { message: "New password must be 6 digits" })
+    .regex(/^\d{6}$/, { message: "New password must be a 6-digit number." })
+    .optional(),
+});

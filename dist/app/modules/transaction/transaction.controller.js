@@ -66,7 +66,6 @@ const agentCashOut = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0
         data: result
     });
 }));
-// controller
 const getMyHistory = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const { page = 1, limit = 10, type } = req.query;

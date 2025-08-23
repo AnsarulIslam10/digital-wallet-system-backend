@@ -73,9 +73,24 @@ const suspendAgent = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0
         data: result,
     });
 }));
+const updateUser = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!req.user)
+        throw new AppError_1.default(http_status_codes_1.default.UNAUTHORIZED, "Unauthorized");
+    const decodedToken = req.user;
+    if (!decodedToken.userId)
+        throw new AppError_1.default(http_status_codes_1.default.UNAUTHORIZED, "Invalid token payload");
+    const updatedUser = yield user_service_1.UserServices.updateUser(decodedToken.userId, req.body);
+    (0, sendResponse_1.sendResponse)(res, {
+        success: true,
+        statusCode: http_status_codes_1.default.OK,
+        message: "Profile updated successfully",
+        data: updatedUser,
+    });
+}));
 exports.UserControllers = {
     createUser,
     getAllUsers,
+    updateUser,
     getMe,
     approveAgent,
     suspendAgent

@@ -71,9 +71,32 @@ const updateApprovalStatus = (agentId, status) => __awaiter(void 0, void 0, void
     yield user.save();
     return user;
 });
+const updateUser = (userId, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findById(userId);
+    if (!user)
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User not found");
+    const { name, phone, currentPassword, newPassword } = payload;
+    if (name)
+        user.name = name;
+    if (phone) {
+        const isPhoneTaken = yield user_model_1.User.findOne({ phone, _id: { $ne: userId } });
+        if (isPhoneTaken)
+            throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Phone number already in use");
+        user.phone = phone;
+    }
+    if (currentPassword && newPassword) {
+        const isMatch = yield bcryptjs_1.default.compare(currentPassword, user.password);
+        if (!isMatch)
+            throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Current password is incorrect");
+        user.password = yield bcryptjs_1.default.hash(newPassword, Number(env_1.envVars.BCRYPT_SALT_ROUND));
+    }
+    yield user.save();
+    return user;
+});
 exports.UserServices = {
     createUser,
     getAllUsers,
     getMe,
+    updateUser,
     updateApprovalStatus
 };

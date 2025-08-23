@@ -62,9 +62,33 @@ const updateApprovalStatus = async (agentId: string, status: boolean) => {
   return user;
 };
 
+const updateUser = async (userId: string, payload: Partial<IUser> & { currentPassword?: string, newPassword?: string }) => {
+  const user = await User.findById(userId);
+  if (!user) throw new AppError(httpStatus.NOT_FOUND, "User not found");
+
+  const { name, phone, currentPassword, newPassword } = payload;
+
+  if (name) user.name = name;
+  if (phone) {
+    const isPhoneTaken = await User.findOne({ phone, _id: { $ne: userId } });
+    if (isPhoneTaken) throw new AppError(httpStatus.BAD_REQUEST, "Phone number already in use");
+    user.phone = phone;
+  }
+
+  if (currentPassword && newPassword) {
+    const isMatch = await bcriptjs.compare(currentPassword, user.password);
+    if (!isMatch) throw new AppError(httpStatus.BAD_REQUEST, "Current password is incorrect");
+    user.password = await bcriptjs.hash(newPassword, Number(envVars.BCRYPT_SALT_ROUND));
+  }
+
+  await user.save();
+  return user;
+};
+
 export const UserServices = {
   createUser,
   getAllUsers,
   getMe,
+  updateUser,
   updateApprovalStatus
 };

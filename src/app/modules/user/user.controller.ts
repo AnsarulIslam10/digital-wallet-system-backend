@@ -79,9 +79,28 @@ const suspendAgent = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+const updateUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user) throw new AppError(httpStatus.UNAUTHORIZED, "Unauthorized");
+
+  const decodedToken = req.user as JwtPayload;
+  if (!decodedToken.userId) throw new AppError(httpStatus.UNAUTHORIZED, "Invalid token payload");
+
+  const updatedUser = await UserServices.updateUser(decodedToken.userId, req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Profile updated successfully",
+    data: updatedUser,
+  });
+});
+
+
 export const UserControllers = {
   createUser,
   getAllUsers,
+  updateUser,
   getMe,
   approveAgent,
   suspendAgent
