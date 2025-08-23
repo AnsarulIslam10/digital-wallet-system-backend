@@ -52,8 +52,13 @@ const agentCashIn = catchAsync(async (req: Request, res: Response) => {
 });
 
 const agentCashOut = catchAsync(async (req: Request, res: Response) => {
-  const { userPhone, amount } = req.body;
-  const result = await TransactionService.agentCashOut(req.user.userId, userPhone, amount);
+  const { userPhone, amount, password } = req.body;
+  const result = await TransactionService.agentCashOut(
+    req.user.userId,
+    userPhone,
+    amount,
+    password
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -62,6 +67,7 @@ const agentCashOut = catchAsync(async (req: Request, res: Response) => {
     data: result
   });
 });
+
 
 const getMyHistory = catchAsync(async (req: Request, res: Response) => {
   const { page = 1, limit = 10, type } = req.query;

@@ -153,7 +153,12 @@ const agentCashIn = async (agentId: string, receiverPhone: string, amount: numbe
   });
 };
 
-const agentCashOut = async (agentId: string, userPhone: string, amount: number) => {
+const agentCashOut = async (
+  agentId: string,
+  userPhone: string,
+  amount: number,
+  password: string // <-- added password
+) => {
   const agent = await User.findById(agentId);
   if (!agent || agent.role !== 'agent') {
     throw new AppError(400, 'Only agents can perform cash-out');
@@ -162,23 +167,35 @@ const agentCashOut = async (agentId: string, userPhone: string, amount: number) 
     throw new AppError(403, 'Agent is not approved yet');
   }
 
-  const sender = await User.findOne({ phone: userPhone });
-  const senderWallet = await Wallet.findOne({ user: sender?._id });
+  // Find the user
+  const sender = await User.findOne({ phone: userPhone }).select("+password");
+  if (!sender) throw new AppError(404, 'User not found');
 
-  if (!senderWallet || senderWallet.isBlocked) throw new AppError(403, 'Sender wallet is blocked');
+  // Verify user password
+  const isPasswordValid = await bcrypt.compare(password, sender.password);
+  if (!isPasswordValid) throw new AppError(401, 'Invalid password');
+
+  const senderWallet = await Wallet.findOne({ user: sender._id });
+  if (!senderWallet) throw new AppError(404, 'User wallet not found');
+  if (senderWallet.isBlocked) throw new AppError(403, 'User wallet is blocked');
   if (senderWallet.balance < amount) throw new AppError(400, 'Insufficient balance');
 
+  // Deduct amount
   senderWallet.balance -= amount;
   await senderWallet.save();
 
+  // Record transaction
   await Transaction.create({
-    from: sender?._id,
+    from: sender._id,
     to: agentId,
     amount,
     type: 'cash-out',
     description: 'Agent cash-out',
   });
+
+  return { balance: senderWallet.balance };
 };
+
 
 const getMyTransactions = async (
   userId: string,

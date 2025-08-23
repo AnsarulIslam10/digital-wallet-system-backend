@@ -150,7 +150,8 @@ const agentCashIn = (agentId, receiverPhone, amount) => __awaiter(void 0, void 0
         description: 'Agent cash-in',
     });
 });
-const agentCashOut = (agentId, userPhone, amount) => __awaiter(void 0, void 0, void 0, function* () {
+const agentCashOut = (agentId, userPhone, amount, password // <-- added password
+) => __awaiter(void 0, void 0, void 0, function* () {
     const agent = yield user_model_1.User.findById(agentId);
     if (!agent || agent.role !== 'agent') {
         throw new AppError_1.default(400, 'Only agents can perform cash-out');
@@ -158,21 +159,33 @@ const agentCashOut = (agentId, userPhone, amount) => __awaiter(void 0, void 0, v
     if (!agent.isApproved) {
         throw new AppError_1.default(403, 'Agent is not approved yet');
     }
-    const sender = yield user_model_1.User.findOne({ phone: userPhone });
-    const senderWallet = yield wallet_model_1.Wallet.findOne({ user: sender === null || sender === void 0 ? void 0 : sender._id });
-    if (!senderWallet || senderWallet.isBlocked)
-        throw new AppError_1.default(403, 'Sender wallet is blocked');
+    // Find the user
+    const sender = yield user_model_1.User.findOne({ phone: userPhone }).select("+password");
+    if (!sender)
+        throw new AppError_1.default(404, 'User not found');
+    // Verify user password
+    const isPasswordValid = yield bcryptjs_1.default.compare(password, sender.password);
+    if (!isPasswordValid)
+        throw new AppError_1.default(401, 'Invalid password');
+    const senderWallet = yield wallet_model_1.Wallet.findOne({ user: sender._id });
+    if (!senderWallet)
+        throw new AppError_1.default(404, 'User wallet not found');
+    if (senderWallet.isBlocked)
+        throw new AppError_1.default(403, 'User wallet is blocked');
     if (senderWallet.balance < amount)
         throw new AppError_1.default(400, 'Insufficient balance');
+    // Deduct amount
     senderWallet.balance -= amount;
     yield senderWallet.save();
+    // Record transaction
     yield transaction_model_1.Transaction.create({
-        from: sender === null || sender === void 0 ? void 0 : sender._id,
+        from: sender._id,
         to: agentId,
         amount,
         type: 'cash-out',
         description: 'Agent cash-out',
     });
+    return { balance: senderWallet.balance };
 });
 const getMyTransactions = (userId_1, ...args_1) => __awaiter(void 0, [userId_1, ...args_1], void 0, function* (userId, page = 1, limit = 10, type) {
     const skip = (page - 1) * limit;
