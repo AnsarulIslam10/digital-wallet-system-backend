@@ -30,8 +30,6 @@ const createUser = async (payload: Partial<IUser>) => {
 
   const user = await User.create(userData);
 
-  
-
   return user;
 };
 
@@ -47,10 +45,11 @@ const getAllUsers = async () => {
   };
 };
 const getMe = async (userId: string) => {
-    const user = await User.findById(userId).select("-password");
-    return {
-        data: user
-    }
+  const user = await User.findById(userId).select("-password");
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+  return { data: user };
 };
 
 const updateApprovalStatus = async (agentId: string, status: boolean) => {

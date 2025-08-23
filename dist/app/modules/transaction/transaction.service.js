@@ -19,6 +19,7 @@ const AppError_1 = __importDefault(require("../../errorHelpers/AppError"));
 const user_model_1 = require("../user/user.model");
 const wallet_model_1 = require("../wallet/wallet.model");
 const transaction_model_1 = require("./transaction.model");
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const addMoney = (userId, amount) => __awaiter(void 0, void 0, void 0, function* () {
     const wallet = yield wallet_model_1.Wallet.findOne({ user: userId });
     if (!wallet || wallet.isBlocked)
@@ -32,7 +33,13 @@ const addMoney = (userId, amount) => __awaiter(void 0, void 0, void 0, function*
         description: 'Wallet top-up',
     });
 });
-const withdrawMoney = (userId, amount) => __awaiter(void 0, void 0, void 0, function* () {
+const withdrawMoney = (userId, amount, password) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findById(userId).select("+password"); // make sure password field is selected
+    if (!user)
+        throw new AppError_1.default(404, 'User not found');
+    const isMatch = yield bcryptjs_1.default.compare(password, user.password);
+    if (!isMatch)
+        throw new AppError_1.default(400, 'Invalid password');
     const wallet = yield wallet_model_1.Wallet.findOne({ user: userId });
     if (!wallet || wallet.isBlocked)
         throw new AppError_1.default(403, 'Wallet is blocked or not found');
@@ -46,6 +53,7 @@ const withdrawMoney = (userId, amount) => __awaiter(void 0, void 0, void 0, func
         type: 'withdraw',
         description: 'Wallet withdrawal',
     });
+    return { balance: wallet.balance };
 });
 const sendMoney = (senderId, receiverPhone, amount) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;

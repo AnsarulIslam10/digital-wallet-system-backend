@@ -17,6 +17,7 @@ const user_service_1 = require("./user.service");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const sendResponse_1 = require("../../utils/sendResponse");
 const catchAsync_1 = require("../../utils/catchAsync");
+const AppError_1 = __importDefault(require("../../errorHelpers/AppError"));
 const createUser = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield user_service_1.UserServices.createUser(req.body);
     (0, sendResponse_1.sendResponse)(res, {
@@ -37,13 +38,19 @@ const getAllUsers = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(v
     });
 }));
 const getMe = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!req.user) {
+        throw new AppError_1.default(http_status_codes_1.default.UNAUTHORIZED, "Unauthorized: No token provided");
+    }
     const decodedToken = req.user;
+    if (!decodedToken.userId) {
+        throw new AppError_1.default(http_status_codes_1.default.UNAUTHORIZED, "Unauthorized: Invalid token payload");
+    }
     const result = yield user_service_1.UserServices.getMe(decodedToken.userId);
     (0, sendResponse_1.sendResponse)(res, {
         success: true,
-        statusCode: http_status_codes_1.default.CREATED,
-        message: "Your profile Retrieved Successfully",
-        data: result.data
+        statusCode: http_status_codes_1.default.OK,
+        message: "Profile retrieved successfully",
+        data: result.data,
     });
 }));
 const approveAgent = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {

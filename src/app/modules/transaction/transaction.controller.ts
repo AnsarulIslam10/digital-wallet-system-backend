@@ -15,14 +15,16 @@ const addMoney = catchAsync(async (req: Request, res: Response) => {
 })
 
 const withdrawMoney = catchAsync(async (req: Request, res: Response) => {
-    const result = await TransactionService.withdrawMoney(req.user.userId, req.body.amount);
+    const { amount, password } = req.body;
+    const result = await TransactionService.withdrawMoney(req.user.userId, amount, password);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: 'Money withdrawn successfully',
         data: result,
     });
-})
+});
+
 
 const sendMoney = catchAsync(async (req: Request, res: Response) => {
   const { receiverPhone, amount } = req.body;

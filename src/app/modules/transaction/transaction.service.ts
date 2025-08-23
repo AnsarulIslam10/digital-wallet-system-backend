@@ -4,7 +4,7 @@ import AppError from '../../errorHelpers/AppError';
 import { User } from '../user/user.model';
 import { Wallet } from '../wallet/wallet.model';
 import { Transaction } from './transaction.model';
-
+import bcrypt from 'bcryptjs';
 
 const addMoney = async (userId: string, amount: number) => {
   const wallet = await Wallet.findOne({ user: userId });
@@ -21,7 +21,13 @@ const addMoney = async (userId: string, amount: number) => {
   });
 }
 
-const withdrawMoney = async (userId: string, amount: number) => {
+const withdrawMoney = async (userId: string, amount: number, password: string) => {
+  const user = await User.findById(userId).select("+password"); // make sure password field is selected
+  if (!user) throw new AppError(404, 'User not found');
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) throw new AppError(400, 'Invalid password');
+
   const wallet = await Wallet.findOne({ user: userId });
   if (!wallet || wallet.isBlocked) throw new AppError(403, 'Wallet is blocked or not found');
   if (wallet.balance < amount) throw new AppError(400, 'Insufficient balance');
@@ -35,7 +41,9 @@ const withdrawMoney = async (userId: string, amount: number) => {
     type: 'withdraw',
     description: 'Wallet withdrawal',
   });
-}
+
+  return { balance: wallet.balance };
+};
 
 const sendMoney = async (senderId: string, receiverPhone: string, amount: number) => {
   const feeRate = envVars.TRANSACTION_FEE_PERCENT || 0;

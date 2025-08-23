@@ -7,6 +7,7 @@ import httpStatus from 'http-status-codes';
 import { sendResponse } from '../../utils/sendResponse';
 import { catchAsync } from '../../utils/catchAsync';
 import { JwtPayload } from 'jsonwebtoken';
+import AppError from '../../errorHelpers/AppError';
 
 
 const createUser = catchAsync(
@@ -36,16 +37,26 @@ const getAllUsers = catchAsync(
 );
 
 const getMe = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const decodedToken = req.user as JwtPayload
-    const result = await UserServices.getMe(decodedToken.userId);
+  if (!req.user) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Unauthorized: No token provided");
+  }
 
-    sendResponse(res, {
-        success: true,
-        statusCode: httpStatus.CREATED,
-        message: "Your profile Retrieved Successfully",
-        data: result.data
-    })
-})
+  const decodedToken = req.user as JwtPayload;
+
+  if (!decodedToken.userId) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Unauthorized: Invalid token payload");
+  }
+
+  const result = await UserServices.getMe(decodedToken.userId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Profile retrieved successfully",
+    data: result.data,
+  });
+});
+
 
 const approveAgent = catchAsync(async (req: Request, res: Response) => {
   const { agentId } = req.params;

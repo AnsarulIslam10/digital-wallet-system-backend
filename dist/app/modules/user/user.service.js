@@ -56,9 +56,10 @@ const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 const getMe = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield user_model_1.User.findById(userId).select("-password");
-    return {
-        data: user
-    };
+    if (!user) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User not found");
+    }
+    return { data: user };
 });
 const updateApprovalStatus = (agentId, status) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield user_model_1.User.findById(agentId);
