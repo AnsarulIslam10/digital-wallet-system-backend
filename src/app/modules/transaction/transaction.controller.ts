@@ -88,6 +88,23 @@ const getMyHistory = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAgentHandledTransactions = catchAsync(async (req: Request, res: Response) => {
+  const { page = 1, limit = 10 } = req.query;
+  const agentId = req.user.userId;
+
+  const result = await TransactionService.getAgentTransactions(
+    agentId,
+    Number(page),
+    Number(limit)
+  );
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Agent transactions retrieved successfully",
+    data: result,
+  });
+});
 
 const getAll = catchAsync(async (_req: Request, res: Response) => {
   const result = await TransactionService.getAllTransactions();
@@ -116,6 +133,7 @@ export const TransactionController = {
   agentCashIn,
   agentCashOut,
   getMyHistory,
+  getAgentHandledTransactions,
   getAll,
   getAgentCommissions
 

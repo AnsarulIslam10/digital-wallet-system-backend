@@ -21,7 +21,8 @@ router.post('/send', checkAuth(Role.USER), validateRequest(sendMoneyValidation),
 // AGENT routes
 router.post('/cash-in', checkAuth(Role.AGENT), validateRequest(agentCashInValidation), TransactionController.agentCashIn);
 router.post('/cash-out', checkAuth(Role.AGENT), validateRequest(agentCashOutValidation), TransactionController.agentCashOut);
-
+router.get('/agent-transactions',checkAuth(Role.AGENT), TransactionController.getAgentHandledTransactions
+);
 // Shared
 router.get('/my-history', checkAuth(Role.USER, Role.AGENT), TransactionController.getMyHistory);
 

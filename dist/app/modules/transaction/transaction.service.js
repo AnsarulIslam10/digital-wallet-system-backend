@@ -211,6 +211,24 @@ const getMyTransactions = (userId_1, ...args_1) => __awaiter(void 0, [userId_1, 
         },
     };
 });
+const getAgentTransactions = (agentId_1, ...args_1) => __awaiter(void 0, [agentId_1, ...args_1], void 0, function* (agentId, page = 1, limit = 10) {
+    const skip = (page - 1) * limit;
+    // Include both cash-in and cash-out transactions for this agent
+    const filter = {
+        type: { $in: ['cash-in', 'cash-out'] },
+        $or: [{ from: agentId }, { to: agentId }],
+    };
+    const transactions = yield transaction_model_1.Transaction.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+    const total = yield transaction_model_1.Transaction.countDocuments(filter);
+    const totalPages = Math.ceil(total / limit);
+    return {
+        data: transactions,
+        meta: { page, limit, total, totalPages },
+    };
+});
 const getAllTransactions = () => __awaiter(void 0, void 0, void 0, function* () {
     return transaction_model_1.Transaction.find().sort({ createdAt: -1 });
 });
@@ -232,6 +250,7 @@ exports.TransactionService = {
     agentCashIn,
     agentCashOut,
     getMyTransactions,
+    getAgentTransactions,
     getAllTransactions,
     getAgentCommission
 };

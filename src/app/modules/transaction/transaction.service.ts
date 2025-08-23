@@ -233,6 +233,28 @@ const getMyTransactions = async (
   };
 };
 
+const getAgentTransactions = async (agentId: string, page = 1, limit = 10) => {
+  const skip = (page - 1) * limit;
+
+  const filter = {
+    type: { $in: ['cash-in', 'cash-out'] },
+    $or: [{ from: agentId }, { to: agentId }],
+  };
+
+  const transactions = await Transaction.find(filter)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Transaction.countDocuments(filter);
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    data: transactions,
+    meta: { page, limit, total, totalPages },
+  };
+};
+
 
 
 const getAllTransactions = async () => {
@@ -260,6 +282,7 @@ export const TransactionService = {
   agentCashIn,
   agentCashOut,
   getMyTransactions,
+  getAgentTransactions,
   getAllTransactions,
   getAgentCommission
 }

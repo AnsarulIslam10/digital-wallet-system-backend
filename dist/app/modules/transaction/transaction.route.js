@@ -18,6 +18,7 @@ router.post('/send', (0, checkAuth_1.checkAuth)(user_interface_1.Role.USER), (0,
 // AGENT routes
 router.post('/cash-in', (0, checkAuth_1.checkAuth)(user_interface_1.Role.AGENT), (0, validateRequest_1.validateRequest)(transaction_validation_1.agentCashInValidation), transaction_controller_1.TransactionController.agentCashIn);
 router.post('/cash-out', (0, checkAuth_1.checkAuth)(user_interface_1.Role.AGENT), (0, validateRequest_1.validateRequest)(transaction_validation_1.agentCashOutValidation), transaction_controller_1.TransactionController.agentCashOut);
+router.get('/agent-transactions', (0, checkAuth_1.checkAuth)(user_interface_1.Role.AGENT), transaction_controller_1.TransactionController.getAgentHandledTransactions);
 // Shared
 router.get('/my-history', (0, checkAuth_1.checkAuth)(user_interface_1.Role.USER, user_interface_1.Role.AGENT), transaction_controller_1.TransactionController.getMyHistory);
 // ADMIN routes

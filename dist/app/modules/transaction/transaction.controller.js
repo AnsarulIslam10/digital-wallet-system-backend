@@ -78,6 +78,17 @@ const getMyHistory = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0
         data: result,
     });
 }));
+const getAgentHandledTransactions = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { page = 1, limit = 10 } = req.query;
+    const agentId = req.user.userId;
+    const result = yield transaction_service_1.TransactionService.getAgentTransactions(agentId, Number(page), Number(limit));
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Agent transactions retrieved successfully",
+        data: result,
+    });
+}));
 const getAll = (0, catchAsync_1.catchAsync)((_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield transaction_service_1.TransactionService.getAllTransactions();
     (0, sendResponse_1.sendResponse)(res, {
@@ -104,6 +115,7 @@ exports.TransactionController = {
     agentCashIn,
     agentCashOut,
     getMyHistory,
+    getAgentHandledTransactions,
     getAll,
     getAgentCommissions
 };
