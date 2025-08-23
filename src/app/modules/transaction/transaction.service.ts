@@ -173,7 +173,7 @@ const agentCashOut = async (
 
   // Verify user password
   const isPasswordValid = await bcrypt.compare(password, sender.password);
-  if (!isPasswordValid) throw new AppError(401, 'Invalid password');
+  if (!isPasswordValid) throw new AppError(400, 'Invalid password');
 
   const senderWallet = await Wallet.findOne({ user: sender._id });
   if (!senderWallet) throw new AppError(404, 'User wallet not found');

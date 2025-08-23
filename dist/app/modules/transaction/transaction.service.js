@@ -166,7 +166,7 @@ const agentCashOut = (agentId, userPhone, amount, password // <-- added password
     // Verify user password
     const isPasswordValid = yield bcryptjs_1.default.compare(password, sender.password);
     if (!isPasswordValid)
-        throw new AppError_1.default(401, 'Invalid password');
+        throw new AppError_1.default(400, 'Invalid password');
     const senderWallet = yield wallet_model_1.Wallet.findOne({ user: sender._id });
     if (!senderWallet)
         throw new AppError_1.default(404, 'User wallet not found');
