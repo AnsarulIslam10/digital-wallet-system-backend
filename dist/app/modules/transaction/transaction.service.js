@@ -213,7 +213,6 @@ const getMyTransactions = (userId_1, ...args_1) => __awaiter(void 0, [userId_1, 
 });
 const getAgentTransactions = (agentId_1, ...args_1) => __awaiter(void 0, [agentId_1, ...args_1], void 0, function* (agentId, page = 1, limit = 10) {
     const skip = (page - 1) * limit;
-    // Include both cash-in and cash-out transactions for this agent
     const filter = {
         type: { $in: ['cash-in', 'cash-out'] },
         $or: [{ from: agentId }, { to: agentId }],

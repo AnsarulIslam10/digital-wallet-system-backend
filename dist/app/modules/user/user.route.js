@@ -13,6 +13,8 @@ router.post('/register', (0, validateRequest_1.validateRequest)(user_validation_
 router.get('/all-users', (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), user_controller_1.UserControllers.getAllUsers);
 router.get("/me", (0, checkAuth_1.checkAuth)(...Object.values(user_interface_1.Role)), user_controller_1.UserControllers.getMe);
 router.patch("/me/update", (0, checkAuth_1.checkAuth)(...Object.values(user_interface_1.Role)), (0, validateRequest_1.validateRequest)(user_validation_1.updateUserZodSchema), checkPasswordFields_1.checkPasswordFields, user_controller_1.UserControllers.updateUser);
+router.patch('/block/:userId', (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), user_controller_1.UserControllers.blockUser);
+router.patch('/unblock/:userId', (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), user_controller_1.UserControllers.unblockUser);
 router.patch('/agent/approve/:agentId', (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), user_controller_1.UserControllers.approveAgent);
 router.patch('/agent/suspend/:agentId', (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), user_controller_1.UserControllers.suspendAgent);
 exports.UserRoutes = router;

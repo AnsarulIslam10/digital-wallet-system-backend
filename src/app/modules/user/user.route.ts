@@ -19,6 +19,10 @@ router.patch(
     checkPasswordFields,
     UserControllers.updateUser
 );
+
+router.patch('/block/:userId', checkAuth(Role.ADMIN), UserControllers.blockUser);
+router.patch('/unblock/:userId', checkAuth(Role.ADMIN), UserControllers.unblockUser);
+
 router.patch('/agent/approve/:agentId', checkAuth(Role.ADMIN), UserControllers.approveAgent);
 router.patch('/agent/suspend/:agentId', checkAuth(Role.ADMIN), UserControllers.suspendAgent);
 

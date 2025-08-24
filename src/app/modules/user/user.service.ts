@@ -85,10 +85,28 @@ const updateUser = async (userId: string, payload: Partial<IUser> & { currentPas
   return user;
 };
 
+const blockUser = async (userId: string) => {
+  const user = await User.findById(userId);
+  if (!user) throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  user.isBlocked = true;
+  await user.save();
+  return user;
+};
+
+const unblockUser = async (userId: string) => {
+  const user = await User.findById(userId);
+  if (!user) throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  user.isBlocked = false;
+  await user.save();
+  return user;
+};
+
 export const UserServices = {
   createUser,
   getAllUsers,
   getMe,
   updateUser,
-  updateApprovalStatus
+  updateApprovalStatus,
+  blockUser,
+  unblockUser
 };

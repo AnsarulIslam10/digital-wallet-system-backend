@@ -93,10 +93,28 @@ const updateUser = (userId, payload) => __awaiter(void 0, void 0, void 0, functi
     yield user.save();
     return user;
 });
+const blockUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findById(userId);
+    if (!user)
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User not found");
+    user.isBlocked = true;
+    yield user.save();
+    return user;
+});
+const unblockUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findById(userId);
+    if (!user)
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User not found");
+    user.isBlocked = false;
+    yield user.save();
+    return user;
+});
 exports.UserServices = {
     createUser,
     getAllUsers,
     getMe,
     updateUser,
-    updateApprovalStatus
+    updateApprovalStatus,
+    blockUser,
+    unblockUser
 };

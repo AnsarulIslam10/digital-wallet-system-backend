@@ -87,11 +87,33 @@ const updateUser = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(vo
         data: updatedUser,
     });
 }));
+const blockUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.params;
+    const result = yield user_service_1.UserServices.blockUser(userId);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "User blocked successfully",
+        data: result,
+    });
+}));
+const unblockUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.params;
+    const result = yield user_service_1.UserServices.unblockUser(userId);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "User unblocked successfully",
+        data: result,
+    });
+}));
 exports.UserControllers = {
     createUser,
     getAllUsers,
     updateUser,
     getMe,
     approveAgent,
-    suspendAgent
+    suspendAgent,
+    blockUser,
+    unblockUser
 };
