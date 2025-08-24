@@ -13,13 +13,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransactionService = void 0;
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const env_1 = require("../../config/env");
 const AppError_1 = __importDefault(require("../../errorHelpers/AppError"));
 const user_model_1 = require("../user/user.model");
 const wallet_model_1 = require("../wallet/wallet.model");
 const transaction_model_1 = require("./transaction.model");
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const addMoney = (userId, amount) => __awaiter(void 0, void 0, void 0, function* () {
     const wallet = yield wallet_model_1.Wallet.findOne({ user: userId });
     if (!wallet || wallet.isBlocked)
@@ -228,8 +228,23 @@ const getAgentTransactions = (agentId_1, ...args_1) => __awaiter(void 0, [agentI
         meta: { page, limit, total, totalPages },
     };
 });
-const getAllTransactions = () => __awaiter(void 0, void 0, void 0, function* () {
-    return transaction_model_1.Transaction.find().sort({ createdAt: -1 });
+const getAllTransactions = (...args_1) => __awaiter(void 0, [...args_1], void 0, function* (page = 1, limit = 10, sort = "desc", type) {
+    const skip = (page - 1) * limit;
+    // Build the filter
+    const filter = {};
+    if (type) {
+        filter.type = type;
+    }
+    const transactions = yield transaction_model_1.Transaction.find(filter)
+        .sort({ createdAt: sort })
+        .skip(skip)
+        .limit(limit);
+    const total = yield transaction_model_1.Transaction.countDocuments(filter);
+    const totalPages = Math.ceil(total / limit);
+    return {
+        data: transactions,
+        meta: { page, limit, total, totalPages },
+    };
 });
 const getAgentCommission = (agentId) => __awaiter(void 0, void 0, void 0, function* () {
     const commissions = yield transaction_model_1.Transaction.find({

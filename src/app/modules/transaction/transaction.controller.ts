@@ -106,15 +106,26 @@ const getAgentHandledTransactions = catchAsync(async (req: Request, res: Respons
   });
 });
 
-const getAll = catchAsync(async (_req: Request, res: Response) => {
-  const result = await TransactionService.getAllTransactions();
+const getAll = catchAsync(async (req: Request, res: Response) => {
+  const { page = 1, limit = 10, sort, type } = req.query;
+  const sortOrder: "asc" | "desc" = sort === "asc" ? "asc" : "desc";
+
+  const result = await TransactionService.getAllTransactions(
+    Number(page),
+    Number(limit),
+    sortOrder,
+    type as string | undefined
+  );
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'All transactions retrieved',
     data: result,
   });
-})
+});
+
+
 const getAgentCommissions = catchAsync(async (req: Request, res: Response) => {
   const agentId = req.user.userId;
   const result = await TransactionService.getAgentCommission(agentId);

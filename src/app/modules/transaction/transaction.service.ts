@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
 import { envVars } from '../../config/env';
 import AppError from '../../errorHelpers/AppError';
 import { User } from '../user/user.model';
 import { Wallet } from '../wallet/wallet.model';
 import { Transaction } from './transaction.model';
-import bcrypt from 'bcryptjs';
 
 const addMoney = async (userId: string, amount: number) => {
   const wallet = await Wallet.findOne({ user: userId });
@@ -256,10 +257,34 @@ const getAgentTransactions = async (agentId: string, page = 1, limit = 10) => {
 };
 
 
+const getAllTransactions = async (
+  page = 1,
+  limit = 10,
+  sort: "asc" | "desc" = "desc",
+  type?: string
+) => {
+  const skip = (page - 1) * limit;
 
-const getAllTransactions = async () => {
-  return Transaction.find().sort({ createdAt: -1 });
-}
+  // Build the filter
+  const filter: Record<string, any> = {};
+  if (type) {
+    filter.type = type;
+  }
+
+  const transactions = await Transaction.find(filter)
+    .sort({ createdAt: sort })
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Transaction.countDocuments(filter);
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    data: transactions,
+    meta: { page, limit, total, totalPages },
+  };
+};
+
 const getAgentCommission = async (agentId: string) => {
   const commissions = await Transaction.find({
     from: agentId,

@@ -89,8 +89,10 @@ const getAgentHandledTransactions = (0, catchAsync_1.catchAsync)((req, res) => _
         data: result,
     });
 }));
-const getAll = (0, catchAsync_1.catchAsync)((_req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield transaction_service_1.TransactionService.getAllTransactions();
+const getAll = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { page = 1, limit = 10, sort, type } = req.query;
+    const sortOrder = sort === "asc" ? "asc" : "desc";
+    const result = yield transaction_service_1.TransactionService.getAllTransactions(Number(page), Number(limit), sortOrder, type);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
         success: true,
