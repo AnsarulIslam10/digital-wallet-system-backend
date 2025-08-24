@@ -107,23 +107,28 @@ const getAgentHandledTransactions = catchAsync(async (req: Request, res: Respons
 });
 
 const getAll = catchAsync(async (req: Request, res: Response) => {
-  const { page = 1, limit = 10, sort, type } = req.query;
+  const { page = 1, limit = 10, sort, search, type, minAmount, maxAmount } = req.query;
+
   const sortOrder: "asc" | "desc" = sort === "asc" ? "asc" : "desc";
 
   const result = await TransactionService.getAllTransactions(
     Number(page),
     Number(limit),
     sortOrder,
-    type as string | undefined
+    search as string,
+    type as string,
+    minAmount ? Number(minAmount) : undefined,
+    maxAmount ? Number(maxAmount) : undefined
   );
 
   sendResponse(res, {
-    statusCode: httpStatus.OK,
+    statusCode: 200,
     success: true,
-    message: 'All transactions retrieved',
+    message: "All transactions retrieved",
     data: result,
   });
 });
+
 
 
 const getAgentCommissions = catchAsync(async (req: Request, res: Response) => {

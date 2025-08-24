@@ -261,22 +261,41 @@ const getAllTransactions = async (
   page = 1,
   limit = 10,
   sort: "asc" | "desc" = "desc",
-  type?: string
+  search?: string,
+  type?: string,
+  minAmount?: number,
+  maxAmount?: number
 ) => {
   const skip = (page - 1) * limit;
 
-  // Build the filter
-  const filter: Record<string, any> = {};
-  if (type) {
-    filter.type = type;
+  const query: any = {};
+
+  if (type) query.type = type;
+
+  // Amount filter
+  if (minAmount !== undefined || maxAmount !== undefined) {
+    query.amount = {};
+    if (minAmount !== undefined) query.amount.$gte = minAmount;
+    if (maxAmount !== undefined) query.amount.$lte = maxAmount;
   }
 
-  const transactions = await Transaction.find(filter)
+  // Search filter (description or phone numbers)
+  if (search) {
+    query.$or = [
+      { description: { $regex: search, $options: "i" } },
+      { "from.phone": { $regex: search, $options: "i" } },
+      { "to.phone": { $regex: search, $options: "i" } },
+    ];
+  }
+
+  const transactions = await Transaction.find(query)
+    .populate("from", "phone")
+    .populate("to", "phone")
     .sort({ createdAt: sort })
     .skip(skip)
     .limit(limit);
 
-  const total = await Transaction.countDocuments(filter);
+  const total = await Transaction.countDocuments(query);
   const totalPages = Math.ceil(total / limit);
 
   return {
@@ -284,6 +303,8 @@ const getAllTransactions = async (
     meta: { page, limit, total, totalPages },
   };
 };
+
+
 
 const getAgentCommission = async (agentId: string) => {
   const commissions = await Transaction.find({

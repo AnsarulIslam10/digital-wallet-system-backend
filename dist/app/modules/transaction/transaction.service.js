@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransactionService = void 0;
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const env_1 = require("../../config/env");
@@ -228,18 +229,34 @@ const getAgentTransactions = (agentId_1, ...args_1) => __awaiter(void 0, [agentI
         meta: { page, limit, total, totalPages },
     };
 });
-const getAllTransactions = (...args_1) => __awaiter(void 0, [...args_1], void 0, function* (page = 1, limit = 10, sort = "desc", type) {
+const getAllTransactions = (...args_1) => __awaiter(void 0, [...args_1], void 0, function* (page = 1, limit = 10, sort = "desc", search, type, minAmount, maxAmount) {
     const skip = (page - 1) * limit;
-    // Build the filter
-    const filter = {};
-    if (type) {
-        filter.type = type;
+    const query = {};
+    if (type)
+        query.type = type;
+    // Amount filter
+    if (minAmount !== undefined || maxAmount !== undefined) {
+        query.amount = {};
+        if (minAmount !== undefined)
+            query.amount.$gte = minAmount;
+        if (maxAmount !== undefined)
+            query.amount.$lte = maxAmount;
     }
-    const transactions = yield transaction_model_1.Transaction.find(filter)
+    // Search filter (description or phone numbers)
+    if (search) {
+        query.$or = [
+            { description: { $regex: search, $options: "i" } },
+            { "from.phone": { $regex: search, $options: "i" } },
+            { "to.phone": { $regex: search, $options: "i" } },
+        ];
+    }
+    const transactions = yield transaction_model_1.Transaction.find(query)
+        .populate("from", "phone")
+        .populate("to", "phone")
         .sort({ createdAt: sort })
         .skip(skip)
         .limit(limit);
-    const total = yield transaction_model_1.Transaction.countDocuments(filter);
+    const total = yield transaction_model_1.Transaction.countDocuments(query);
     const totalPages = Math.ceil(total / limit);
     return {
         data: transactions,
