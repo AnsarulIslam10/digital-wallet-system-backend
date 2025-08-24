@@ -131,6 +131,7 @@ const getAll = catchAsync(async (req: Request, res: Response) => {
 
 
 
+
 const getAgentCommissions = catchAsync(async (req: Request, res: Response) => {
   const agentId = req.user.userId;
   const result = await TransactionService.getAgentCommission(agentId);

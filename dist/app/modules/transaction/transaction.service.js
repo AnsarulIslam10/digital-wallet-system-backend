@@ -232,9 +232,10 @@ const getAgentTransactions = (agentId_1, ...args_1) => __awaiter(void 0, [agentI
 const getAllTransactions = (...args_1) => __awaiter(void 0, [...args_1], void 0, function* (page = 1, limit = 10, sort = "desc", search, type, minAmount, maxAmount) {
     const skip = (page - 1) * limit;
     const query = {};
+    // Filter by type
     if (type)
         query.type = type;
-    // Amount filter
+    // Filter by amount
     if (minAmount !== undefined || maxAmount !== undefined) {
         query.amount = {};
         if (minAmount !== undefined)
@@ -242,17 +243,13 @@ const getAllTransactions = (...args_1) => __awaiter(void 0, [...args_1], void 0,
         if (maxAmount !== undefined)
             query.amount.$lte = maxAmount;
     }
-    // Search filter (description or phone numbers)
+    // Filter by description only
     if (search) {
-        query.$or = [
-            { description: { $regex: search, $options: "i" } },
-            { "from.phone": { $regex: search, $options: "i" } },
-            { "to.phone": { $regex: search, $options: "i" } },
-        ];
+        query.description = { $regex: search, $options: "i" };
     }
     const transactions = yield transaction_model_1.Transaction.find(query)
-        .populate("from", "phone")
-        .populate("to", "phone")
+        .populate("from", "phone role")
+        .populate("to", "phone role")
         .sort({ createdAt: sort })
         .skip(skip)
         .limit(limit);
