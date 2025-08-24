@@ -24,6 +24,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserServices = void 0;
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const env_1 = require("../../config/env");
@@ -44,13 +45,33 @@ const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield user_model_1.User.create(userData);
     return user;
 });
-const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield user_model_1.User.find({});
-    const totalUsers = yield user_model_1.User.countDocuments();
+const getAllUsers = (...args_1) => __awaiter(void 0, [...args_1], void 0, function* (page = 1, limit = 10, search) {
+    const skip = (page - 1) * limit;
+    const query = {};
+    if (search) {
+        query.$or = [
+            { phone: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+            { name: { $regex: search, $options: "i" } },
+        ];
+    }
+    // Debug: log the query
+    console.log("Mongo query:", JSON.stringify(query));
+    const [users, totalUsers] = yield Promise.all([
+        user_model_1.User.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit),
+        user_model_1.User.countDocuments(query),
+    ]);
+    const totalPages = Math.ceil(totalUsers / limit);
     return {
         data: users,
         meta: {
-            total: totalUsers
+            page,
+            limit,
+            total: totalUsers,
+            totalPages,
         },
     };
 });

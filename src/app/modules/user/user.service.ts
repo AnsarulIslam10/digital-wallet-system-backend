@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import bcriptjs from 'bcryptjs';
 import httpStatus from 'http-status-codes';
 import { envVars } from '../../config/env';
@@ -33,17 +34,41 @@ const createUser = async (payload: Partial<IUser>) => {
   return user;
 };
 
-const getAllUsers = async () => {
-  const users = await User.find({})
-  const totalUsers = await User.countDocuments();
+const getAllUsers = async (page = 1, limit = 10, search?: string) => {
+  const skip = (page - 1) * limit;
+
+  const query: any = {};
+
+  if (search) {
+    query.$or = [
+      { phone: { $regex: search, $options: "i" } },
+      { email: { $regex: search, $options: "i" } },
+      { name: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  const [users, totalUsers] = await Promise.all([
+    User.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    User.countDocuments(query),
+  ]);
+
+  const totalPages = Math.ceil(totalUsers / limit);
 
   return {
     data: users,
     meta: {
-      total: totalUsers
+      page,
+      limit,
+      total: totalUsers,
+      totalPages,
     },
   };
 };
+
+
 const getMe = async (userId: string) => {
   const user = await User.findById(userId).select("-password");
   if (!user) {

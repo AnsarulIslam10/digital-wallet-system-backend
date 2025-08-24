@@ -25,16 +25,25 @@ const createUser = catchAsync(
 
 const getAllUsers = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const result = await UserServices.getAllUsers();
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const search =
+      typeof req.query.search === "string" && req.query.search.trim() !== ""
+        ? req.query.search.trim()
+        : undefined;
+
+    const result = await UserServices.getAllUsers(page, limit, search);
+
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: 'All users retrieved successfully',
+      message: "All users retrieved successfully",
       data: result.data,
       meta: result.meta,
     });
   }
 );
+
 
 const getMe = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   if (!req.user) {
