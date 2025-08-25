@@ -28,7 +28,6 @@ const createUser = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(vo
     });
 }));
 const getAllUsers = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    // Ensure query params are properly typed and defaulted
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
     const search = typeof req.query.search === "string" && req.query.search.trim() !== ""

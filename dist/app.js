@@ -14,8 +14,19 @@ const env_1 = require("./app/config/env");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)({
-    origin: env_1.envVars.FRONTEND_URL,
-    credentials: true
+    origin: (origin, callback) => {
+        const allowedOrigins = [
+            env_1.envVars.FRONTEND_URL,
+            "http://localhost:5173",
+        ];
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true,
 }));
 app.use("/api/v1", routes_1.router);
 app.get('/', (req, res) => {

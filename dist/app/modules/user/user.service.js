@@ -55,8 +55,6 @@ const getAllUsers = (...args_1) => __awaiter(void 0, [...args_1], void 0, functi
             { name: { $regex: search, $options: "i" } },
         ];
     }
-    // Debug: log the query
-    console.log("Mongo query:", JSON.stringify(query));
     const [users, totalUsers] = yield Promise.all([
         user_model_1.User.find(query)
             .sort({ createdAt: -1 })
