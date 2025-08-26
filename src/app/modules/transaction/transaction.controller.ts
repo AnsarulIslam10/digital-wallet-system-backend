@@ -70,14 +70,16 @@ const agentCashOut = catchAsync(async (req: Request, res: Response) => {
 
 
 const getMyHistory = catchAsync(async (req: Request, res: Response) => {
-  const { page = 1, limit = 10, type } = req.query;
+  const { page = 1, limit = 10, type, startDate, endDate } = req.query;
   const userId = req.user?._id;
 
   const result = await TransactionService.getMyTransactions(
     userId,
     Number(page),
     Number(limit),
-    type as string | undefined
+    type as string | undefined,
+    startDate as string | undefined,
+    endDate as string | undefined
   );
 
   sendResponse(res, {
@@ -87,6 +89,7 @@ const getMyHistory = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
 
 const getAgentHandledTransactions = catchAsync(async (req: Request, res: Response) => {
   const { page = 1, limit = 10 } = req.query;

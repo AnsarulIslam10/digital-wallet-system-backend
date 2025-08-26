@@ -188,13 +188,25 @@ const agentCashOut = (agentId, userPhone, amount, password // <-- added password
     });
     return { balance: senderWallet.balance };
 });
-const getMyTransactions = (userId_1, ...args_1) => __awaiter(void 0, [userId_1, ...args_1], void 0, function* (userId, page = 1, limit = 10, type) {
+const getMyTransactions = (userId_1, ...args_1) => __awaiter(void 0, [userId_1, ...args_1], void 0, function* (userId, page = 1, limit = 10, type, startDate, endDate) {
     const skip = (page - 1) * limit;
     const filter = {
         $or: [{ from: userId }, { to: userId }],
     };
     if (type) {
-        filter.type = type; // assumes your Transaction model has a "type" field
+        filter.type = type;
+    }
+    if (startDate || endDate) {
+        filter.createdAt = {};
+        if (startDate) {
+            filter.createdAt.$gte = new Date(startDate);
+        }
+        if (endDate) {
+            // include the full day of endDate
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+            filter.createdAt.$lte = end;
+        }
     }
     const transactions = yield transaction_model_1.Transaction.find(filter)
         .sort({ createdAt: -1 })

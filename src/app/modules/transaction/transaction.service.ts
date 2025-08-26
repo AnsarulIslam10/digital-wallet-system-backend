@@ -202,7 +202,9 @@ const getMyTransactions = async (
   userId: string,
   page = 1,
   limit = 10,
-  type?: string
+  type?: string,
+  startDate?: string,
+  endDate?: string
 ) => {
   const skip = (page - 1) * limit;
 
@@ -211,7 +213,20 @@ const getMyTransactions = async (
   };
 
   if (type) {
-    filter.type = type; // assumes your Transaction model has a "type" field
+    filter.type = type;
+  }
+
+  if (startDate || endDate) {
+    filter.createdAt = {};
+    if (startDate) {
+      (filter.createdAt as any).$gte = new Date(startDate);
+    }
+    if (endDate) {
+      // include the full day of endDate
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      (filter.createdAt as any).$lte = end;
+    }
   }
 
   const transactions = await Transaction.find(filter)
@@ -233,6 +248,7 @@ const getMyTransactions = async (
     },
   };
 };
+
 
 const getAgentTransactions = async (agentId: string, page = 1, limit = 10) => {
   const skip = (page - 1) * limit;

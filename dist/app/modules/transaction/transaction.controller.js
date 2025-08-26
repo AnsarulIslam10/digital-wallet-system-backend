@@ -68,9 +68,9 @@ const agentCashOut = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0
 }));
 const getMyHistory = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const { page = 1, limit = 10, type } = req.query;
+    const { page = 1, limit = 10, type, startDate, endDate } = req.query;
     const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a._id;
-    const result = yield transaction_service_1.TransactionService.getMyTransactions(userId, Number(page), Number(limit), type);
+    const result = yield transaction_service_1.TransactionService.getMyTransactions(userId, Number(page), Number(limit), type, startDate, endDate);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: 200,
         success: true,
